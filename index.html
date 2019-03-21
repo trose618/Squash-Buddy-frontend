@@ -1,0 +1,59 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" type="text/css" href="index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.css">
+</head>
+
+<body class="masthead" style="position:relative;">
+    <div class="topnav ui fixed" style="position:fixed;z-index: 2;">
+        <h1 style="text-align:center;">Squash Buddy</h1>
+        <h3 style="text-align:center;">Find an opponent or start a team.</h3>
+        <input type="hidden" id="" class="user-id-field"><!--holds id if current user-->
+        <div class="nav" style="background-color:#333;">
+            <div class ="child signin" id="sign-in-div">Sign In</div>
+            <div class ="child signin" id="new-user-div">New User</div>
+            <div class ="child signedin" id="profile-div">Profile</div>
+            <div class ="child signedin" id="teams-div">Teams</div>
+            <div class ="child signedin" id="find-players-div">Find Players</div>
+            <div class ="child signedin" id="messages-div">Messages</div>
+            <div class ="child signedin" id="sign-out-div">Sign out</div>
+        </div>
+    </div>
+
+    <form class="newUser-form ui segment raised" style="display: none;position:absolute;top:40%;left:40%">
+        <label>Enter name</label>
+        <input type="text" id="new-name" placeholder="Username" value=""><br>
+        <label>Select player level</label>
+               <select id = "new-level">
+                 <option>2.5</option>
+                 <option>3.0</option>
+                 <option>3.5</option>
+                 <option>4.0</option>
+                 <option>4.5</option>
+                 <option>5.0</option>
+                 <option>5.5</option>
+                 <option>6.0</option>
+               </select><br>
+        <label for="">Enter city</label>
+        <input type="text" id="new-city" placeholder="City" value=""><br>
+        <label for="">Enter zipcode</label>
+        <input type="number" id="new-zipcode" placeholder="ZipCode" value=""><br>
+        <label for="">Profile picture url</label>
+        <input type="text" id="new-imageurl" placeholder="Profile Picture" value=""><br>
+        <input type="submit" value="Create User">
+    </form>
+
+    <div id="page-panel" style="top:125;position:relative;z-index: 1;"></div>
+    
+</body>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src ="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+    <script src="src/player.js" charset="utf-8"></script>
+    <script src="src/index.js" charset="utf-8"></script>
+    <script src="src/message.js" charset="utf-8"></script>
+</html>
