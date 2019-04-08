@@ -20,12 +20,13 @@
     padding: 14px 16px;
     text-decoration: none;
     font-size: 17px;
+    height: auto;
   }
   
   /* Change the color of divs on hover */
   .topnav div div:hover {
-    background-color: #ddd;
-    color: black;
+    /* background-color: #ddd; */
+    color: yellow;
   }
   
   /* Add a color to the active/current div */
@@ -37,4 +38,81 @@
   .masthead {
     background-image: url('src/squash_background.jpg') !important;
     background-size: cover !important;
+}
+
+.signin-field{
+  text-align: center;
+  position: absolute;
+  top: 40%;
+  left: 40%;
+  
+}
+
+.player-search-form {
+  width: 20%;
+  position: absolute;
+  left: 40%;
+  top: 20px;
+  text-align: center;
+}
+
+.search-results-div {
+  position: absolute;
+  left: 40%;
+  padding-top: 40px;
+}
+
+.close-button {
+  position: absolute;
+  background-color: red;
+  border: solid;
+  border-radius: 100px;
+  width: 1vw;
+  height:1vw;
+  border-width: 1px;
+  top: 0;
+  right: 0;
+}
+
+.message-div {
+  border-radius: 10px;
+  border-width: 0.5vw;
+  width: 300px;
+  border: solid;
+
+}
+
+.messages {
+  height:200px;
+  width:100%;
+  overflow: scroll;
+  overflow-x: hidden;
+  word-break: break-all; 
+  word-wrap: break-word;
+  border: solid;
+  border-width: 0.1vw;
+  border-radius: 5px;
+  background-color: white;
+}
+
+#sideNav {
+  width:20%;
+  right:15;
+  position:fixed;
+  bottom: 0;
+  height: 80%;
+  background-color:#777;
+  overflow: scroll;
+  overflow-x: hidden;
+}
+
+#the-message {
+  height: 60px;
+  width: 100%;
+  border-width: 0.1vw;
+  border-radius: 5px;
+  overflow: scroll;
+  overflow-x: hidden;
+  resize: none
+
 }

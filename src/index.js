@@ -7,6 +7,7 @@ const newUserForm = document.querySelector('.newUser-form')
 const userIdField = document.querySelector('.user-id-field')
 const displayPanel = document.getElementById('page-panel')//holds info displayed to users
 let currentUser = {}
+let userConvos = []
 let currentChatPartner = { name: "", id: "" }
 
 
@@ -28,10 +29,10 @@ document.addEventListener("DOMContentLoaded", () => {
             logout()
 
         }
-        else if (event.target.id === "teams-div") {
-            clearDisplayPanel()
-            displayTeams()
-        }
+        // else if (event.target.id === "teams-div") {
+        //     clearDisplayPanel()
+        //     displayTeams()
+        // }
         else if (event.target.id === "profile-div") {
             clearDisplayPanel()
             displayProfile()
@@ -64,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener('submit', function (event) {
         event.preventDefault()
         //debugger
-        if (event.target.className === "signin-field") {
+        if (event.target.className.includes("signin-field")) {
             //do fetch and set user-id-field.id to this id
             let input = event.target.querySelector('#signin-input').value
 
@@ -73,12 +74,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 .then(handleErrors)
                 .then(res => res.json())
                 .then(data => {
-
+                    console.log(data);
                     currentUser = data
                     showSignedInDivs();
                     userIdField.id = input;
                     clearDisplayPanel()
                     displayProfile(data);
+                    convoPartners()
 
                 }).catch(function (error) {
                     console.log(error)
@@ -95,6 +97,12 @@ document.addEventListener("DOMContentLoaded", () => {
             let zipcode = newUserForm.querySelector('#new-zipcode').value
             let imageurl = newUserForm.querySelector('#new-imageurl').value
 
+            //set default profile pic if non entered
+
+            if (!imageurl) {
+
+                imageurl = "http://media.pixcove.com/W/8/4/Squash-Squeeze-Game-Sports-Free-Image-Player-Free--4018.jpg"
+            }
             newUserForm.reset()
 
             if (!name || !level || !city || !zipcode) {
@@ -123,21 +131,22 @@ document.addEventListener("DOMContentLoaded", () => {
                         userIdField.id = userInfo.id
                         clearDisplayPanel()
                         displayProfile()
+                        convoPartners()
                     })
             }
         }
         if (event.target.className.includes("player-search-form")) {
 
             let nearMe = document.getElementById('near-me').checked
-            let byName = document.getElementById('by-name').checked
-            let byLevel = document.getElementById('by-level').checked
 
-            if (nearMe === false && byName === false && byLevel === false) {
+            let nameInput = document.getElementById('name-input').value
+            let level = document.getElementById('myList').value
+
+            if (!nameInput && !level && nearMe === false) {
                 clearDisplayPanel()
                 displayPlayersDiv()
-                let selectCriteria = document.createElement('p')
-                selectCriteria.innerText = "Please select at least one of the search criteria."
-                displayPanel.append(selectCriteria)
+                alert("Please check at least one of the search criteria.")
+
             }
             else {
 
@@ -146,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 fetch(usersURL)
                     .then(res => res.json())
-                    .then(data => displayPlayers(nearMe, byName, byLevel, nameInput, level, data))
+                    .then(data => displayPlayers(nearMe, nameInput, level, data))
             }
         }
         if (event.target.id === "edit-form") {
@@ -175,6 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     currentUser = data
                     clearDisplayPanel()
                     displayProfile()
+                    convoPartners()
                 })
         }
         if (event.target.className === "new-team-form") {
@@ -221,7 +231,10 @@ document.addEventListener("DOMContentLoaded", () => {
     })//end of submit event listener
 
     displayPanel.addEventListener('click', (event) => {
-        if (event.target.id === "create-team-btn") {
+        if (event.target.className === "close-button") {
+            document.querySelector('.message-div').style = "display: none"
+        }
+        else if (event.target.id === "create-team-btn") {
             renderNewTeamForm()
         }
         else if (event.target.id === "find-team-btn") {
@@ -263,7 +276,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         else if (event.target.innerText === "Message") {
 
+
+            let convoPartner = { name: event.target.id, id: event.target.dataset.id }
+            if (!userConvos.includes(convoPartner)) {
+                userConvos.push(convoPartner)
+            }
             renderConvoSideBar()
+            console.log(event.target.id, event.target.parentElement.id);
             createChatWindow(event.target.id, event.target.parentElement.id)
 
 
@@ -303,6 +322,7 @@ function displayProfile() {
     let userZipCode = document.createElement('h3')
     let editButton = document.createElement('button')
     let deleteButton = document.createElement('button')
+    let userIdNumber = document.createElement('h3')
     userDiv.className = "ui raised segment"
     userDiv.style = "width:50%;background-color:#777"
     if (currentUser.imageurl === null) {
@@ -320,12 +340,14 @@ function displayProfile() {
     userLevel.innerText = `Level: ${currentUser.level}`
     userCity.innerText = `City: ${currentUser.city}`
     userZipCode.innerText = `Zipcode: ${currentUser.zipcode}`
+    userIdNumber.innerText = `Sign-In ID: ${currentUser.id}`
 
     userDiv.append(userProfileTitle)
     userDiv.append(userImage)
     userDiv.append(userLevel)
     userDiv.append(userCity)
     userDiv.append(userZipCode)
+    userDiv.append(userIdNumber)
     userDiv.append(editButton)
     userDiv.append(deleteButton)
 
@@ -369,13 +391,16 @@ function displayPlayerMessages() {
 
 function displayPlayersDiv() {
     let div = document.createElement('div')
-    div.innerHTML = `<form class="player-search-form ui raised segment" style="background-color:#777">
-    <input type="checkbox" id="near-me"> Near me<br>
-    <input type="checkbox" id="by-name"> By name:
+    div.innerHTML = `<form class="player-search-form ui form segment" style="background-color:#777">
+    <div>
+        <h3>Player Search</h3>
+    </div>
+    <br>
+    <label>By name</label> 
     <input type="text" id="name-input" placeholder="Enter player name" value=""><br>
-    <input type="checkbox" id="by-level">
     <label>By Level</label>
                <select id = "myList">
+                 <option></option>
                  <option>2.5</option>
                  <option>3.0</option>
                  <option>3.5</option>
@@ -385,8 +410,13 @@ function displayPlayersDiv() {
                  <option>5.5</option>
                  <option>6.0</option>
                </select>
+    
+    <input type="checkbox" id="near-me"> Near me
     <br>
+    <br>
+    
     <input type="submit" value="Submit">
+    
   </form>`
     displayPanel.append(div)
 }
@@ -422,15 +452,15 @@ function createOrFindTeam(event) {
     }
 }
 
-function displayPlayers(nearMe, byName, byLevel, name, level, data) {
+function displayPlayers(nearMe, name, level, data) {
 
     let players = data
 
-    if (byLevel) {
+    if (level) {
         players = sortByLevel(players, level)
     }
 
-    if (byName) {
+    if (name) {
         players = sortByName(players, name)
     }
 
@@ -440,22 +470,27 @@ function displayPlayers(nearMe, byName, byLevel, name, level, data) {
     clearDisplayPanel()
     displayPlayersDiv()
     if (players === undefined || players.length === 0) {
-        noPlayersFound = document.createElement('p')
-        noPlayersFound.innerText = "Sorry, no players were found matching that criteria"
-        displayPanel.append(noPlayersFound)
+        alert("Sorry, no players were found matching that criteria")
+        // noPlayersFound = document.createElement('p')
+        // noPlayersFound.innerText = "Sorry, no players were found matching that criteria"
+        // displayPanel.append(noPlayersFound)
     } else {
+        resultsDiv = document.createElement('div')
+        resultsDiv.className = "search-results-div"
         players.forEach(function (player) {
             if (player.id !== currentUser.id) {
                 playerInfo = new Player(player.id, player.name, player.level, player.city, player.zipcode, player.imageurl, player.created_at)
                 playerDiv = document.createElement('div')
                 playerDiv.innerHTML = playerInfo.html()
-                displayPanel.append(playerDiv)
+                resultsDiv.append(playerDiv)
 
-                $('.special.cards .image').dimmer({
-                    on: 'hover'
-                });
+
             }
         })
+        displayPanel.append(resultsDiv)
+        $('.special.cards .image').dimmer({
+            on: 'hover'
+        });
     }
 }
 
@@ -516,6 +551,7 @@ function logout() {
     clearDisplayPanel()
     userIdField.id = ""
     currentUser = {}
+    userConvos = []
 }
 function handleErrors(response) {
     if (!response.ok) throw Error(response.statusText);
@@ -529,13 +565,13 @@ function renderConvoSideBar() {
     let sideNav = document.createElement(`div`)
     sideNav.id = "sideNav"
     sideNav.className = "w3-sidebar w3-bar-block w3-card ui list segment raised"
-    sideNav.style = "width:20%;right:0;position:fixed;top:105;background-color:#777;overflow: scroll"
+    // sideNav.style = "width:20%;right:0;position:fixed;background-color:#777;overflow: scroll"
     let h3 = document.createElement('h3')
     h3.innerText = "Conversations"
     sideNav.append(h3)
     //get array of names of ppl user is talking to and create a div ui segment for each w their name
     //append each one to sideNav, then
-    let names = convoPartners()
+    let names = userConvos
     names.forEach(function (obj) {
         //sideNav.append(document.createElement('hr'))
         let name = document.createElement('div')
@@ -573,7 +609,7 @@ function convoPartners() {
 
     let allNames = names1.concat(names2)
     //debugger
-    return uniquify(allNames)
+    userConvos = uniquify(allNames)
 }
 
 function uniquify(array) {
@@ -594,27 +630,35 @@ function openChatWindow(event) {
 
 function createChatWindow(name, id) {
     currentChatPartner = { name: name, id: id }
+
+    //if a chat is already open, close it.
     if (document.querySelector('.ui.comments.segment')) {
         displayPanel.removeChild(document.querySelector('.ui.comments.segment'))
     }
 
     let messageDiv = document.createElement('div')
-    messageDiv.className = "ui comments segment"
+    closeButton = document.createElement('span')
+    closeButton.className = "close-button"
+    closeButton.innerText = " "
+
+    messageDiv.className = "ui comments segment message-div"
     messageDiv.dataset.id = id
-    messageDiv.style = "background-color:#777;position:fixed;bottom:0;right:25%;"
+    messageDiv.style = "background-color:#777;position:fixed;bottom:10;right:25%;z-index:90"
     messageDiv.innerHTML = `
     <h3 class="ui dividing header">${name}</h3>
-    <div class="ui messages" style="height:380px;width:300px;overflow: scroll;word-break: break-all; word-wrap: break-word;">
+    <div class="ui messages">
 
     </div>
-    <form class="ui reply form">
+    <form class="reply-div">
       <div class="field">
-        <textarea id="the-message" style="height:-50px"></textarea>
+        <textarea id="the-message" placeholder="Type your message..."></textarea>
       </div>
-      <div class="ui blue labeled submit icon button send-btn">
-        <i class="icon edit"></i> Send Message
+      <div class="ui blue submit button send-btn">
+         Send Message
       </div>
     </form>`
+
+    messageDiv.appendChild(closeButton)
 
     chatwindowActive = true;
     displayPanel.append(messageDiv)
@@ -640,12 +684,15 @@ function convoPartner(name) {
 }
 
 function renderSignInForm() {
+
     form = document.createElement('form')
-    form.className = "signin-field"
+    form.className = "ui signin-field form segment"
     form.innerHTML = `
+        <h3>Sign In</h3>
         <input type="number" id="signin-input" placeholder="Enter User Id #" value="">
         <input type="submit">`
     form.style = "position:absolute;top:50"
+
     displayPanel.append(form)
 
 }
